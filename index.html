@@ -183,7 +183,7 @@
       <circle cx="14" cy="14" r="9" stroke="#4f8ef7" stroke-width="1.5" stroke-dasharray="4 3"/>
     </svg>
     <h1>Sensalog BLE Monitor</h1>
-    <span id="app-version" style="font-size:0.7rem;font-family:monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.2rem 0.5rem;">v0.0.1+8</span>
+    <span id="app-version" style="font-size:0.7rem;font-family:monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.2rem 0.5rem;">v0.0.1+9</span>
     <div id="status-badge">
       <div class="dot" id="dot"></div>
       <span id="status-text">Disconnected</span>
@@ -552,17 +552,18 @@ function processFrame(encoded) {
     return;
   }
 
+  // Handle both {imu:[...]} map and bare array from firmware
+  const imuPacket = Array.isArray(packet) ? packet : packet['imu'];
+
   if (_dbgFrames++ < 3) {
-    log(`DBG packet keys: [${Object.keys(packet)}]`);
-    const imu0 = packet['imu']?.[0];
-    if (imu0) log(`DBG imu[0] keys: [${Object.keys(imu0)}]  a=${JSON.stringify(imu0['a'])}`);
+    log(`DBG isArray=${Array.isArray(packet)} len=${imuPacket?.length}`);
+    const item0 = imuPacket?.[0];
+    if (item0) log(`DBG item[0] keys:[${Object.keys(item0)}] a=${JSON.stringify(item0['a'])}`);
   }
 
   if (!streamStart) streamStart = performance.now();
   const tSec = (performance.now() - streamStart) / 1000;
 
-  // imu_packet = array of imu_data
-  const imuPacket = packet['imu'];
   if (Array.isArray(imuPacket)) {
     for (const imuData of imuPacket) {
       const accel = imuData['a'];
