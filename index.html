@@ -183,7 +183,7 @@
       <circle cx="14" cy="14" r="9" stroke="#4f8ef7" stroke-width="1.5" stroke-dasharray="4 3"/>
     </svg>
     <h1>Sensalog BLE Monitor</h1>
-    <span id="app-version" style="font-size:0.7rem;font-family:monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.2rem 0.5rem;">v0.0.1+3</span>
+    <span id="app-version" style="font-size:0.7rem;font-family:monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.2rem 0.5rem;">v0.0.1+4</span>
     <div id="status-badge">
       <div class="dot" id="dot"></div>
       <span id="status-text">Disconnected</span>
@@ -198,15 +198,15 @@
     <div class="config-grid">
       <div class="field">
         <label>Service UUID</label>
-        <input id="svc-uuid" type="text" value="0000fff0-0000-1000-8000-00805f9b34fb">
+        <input id="svc-uuid" type="text" value="12345678-1234-5678-1234-56789abcdef0">
       </div>
       <div class="field">
-        <label>Write Characteristic UUID</label>
-        <input id="wr-uuid" type="text" value="0000fff1-0000-1000-8000-00805f9b34fb">
+        <label>Write Characteristic UUID (Command)</label>
+        <input id="wr-uuid" type="text" value="12345678-1234-5678-1234-56789abcdef2">
       </div>
       <div class="field">
-        <label>Notify Characteristic UUID</label>
-        <input id="nt-uuid" type="text" value="0000fff2-0000-1000-8000-00805f9b34fb">
+        <label>Notify Characteristic UUID (Stream)</label>
+        <input id="nt-uuid" type="text" value="12345678-1234-5678-1234-56789abcdef1">
       </div>
     </div>
   </div>
