@@ -183,7 +183,7 @@
       <circle cx="14" cy="14" r="9" stroke="#4f8ef7" stroke-width="1.5" stroke-dasharray="4 3"/>
     </svg>
     <h1>Sensalog BLE Monitor</h1>
-    <span id="app-version" style="font-size:0.7rem;font-family:monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.2rem 0.5rem;">v0.0.1+5</span>
+    <span id="app-version" style="font-size:0.7rem;font-family:monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.2rem 0.5rem;">v0.0.1+6</span>
     <div id="status-badge">
       <div class="dot" id="dot"></div>
       <span id="status-text">Disconnected</span>
@@ -257,7 +257,7 @@
 
 // ═══════════════════════════════════════════
 //  CBOR Decoder
-//  Supports: uint, negint, bytes, text, array, map
+//  Supports: uint, negint, bytes, text, array, map (definite + indefinite length)
 //  Handles int64 via BigUint64 → Number
 // ═══════════════════════════════════════════
 class Cbor {
@@ -280,6 +280,11 @@ class Cbor {
     throw new Error(`CBOR: unsupported additional info ${info}`);
   }
 
+  _isBreak() {
+    if (this.v.getUint8(this.p) === 0xff) { this.p++; return true; }
+    return false;
+  }
+
   _item() {
     const b  = this._rd();
     const mt = b >> 5, ai = b & 0x1f;
@@ -288,8 +293,16 @@ class Cbor {
       case 1: return -1 - this._uint(ai);
       case 2: { const n = this._uint(ai); const d = new Uint8Array(this.b, this.p, n); this.p += n; return d; }
       case 3: { const n = this._uint(ai); const d = new Uint8Array(this.b, this.p, n); this.p += n; return new TextDecoder().decode(d); }
-      case 4: { const n = this._uint(ai); return Array.from({length: n}, () => this._item()); }
-      case 5: { const n = this._uint(ai); const m = {}; for (let i = 0; i < n; i++) { const k = this._item(); m[k] = this._item(); } return m; }
+      case 4: {
+        if (ai === 31) { const a = []; while (!this._isBreak()) a.push(this._item()); return a; }
+        return Array.from({length: this._uint(ai)}, () => this._item());
+      }
+      case 5: {
+        const m = {};
+        if (ai === 31) { while (!this._isBreak()) { const k = this._item(); m[k] = this._item(); } return m; }
+        const n = this._uint(ai); for (let i = 0; i < n; i++) { const k = this._item(); m[k] = this._item(); } return m;
+      }
+      case 7: if (ai === 31) throw new Error('unexpected break'); return undefined;
       default: throw new Error(`CBOR: unsupported major type ${mt}`);
     }
   }
