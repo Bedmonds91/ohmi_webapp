@@ -455,7 +455,7 @@ async function connect() {
     log(`Connection failed: ${err.message}`, 'error');
     setConnectedUI(false);
   } finally {
-    setConnecting(false);
+    if (!isConnected) dot.className = 'dot';
     btnConnect.disabled = false;
   }
 }
